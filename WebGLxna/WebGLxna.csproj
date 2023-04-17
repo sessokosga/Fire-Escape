@@ -26,16 +26,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="BatchTilesComponent.cs" />
     <Compile Include="Pages\Index.razor.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="QuadTxComponent.cs" />
     <Compile Include="ResourceContentManager.cs" />
-    <Compile Include="RTComponent.cs" />
-    <Compile Include="SpriteComponent.cs" />
     <Compile Include="SpriteFontComponent.cs" />
-    <Compile Include="TriangleComponent.cs" />
-    <Compile Include="WebGLxnaGame.cs" />
+    <Compile Include="MyGame.cs" />
+    <Compile Include="TextParser.cs" />
+    <Compile Include="Scenes/SceneCredits.cs" />
+    <Compile Include="Scenes/SceneGameover.cs" />
+    <Compile Include="Scenes/SceneGameplay.cs" />
+    <Compile Include="Scenes/SceneMenu.cs" />
+    <Compile Include="MainGame.cs" />
+    <Compile Include="MyEngine/GameState.cs" />
+    <Compile Include="MyEngine/Scene.cs" />
+    <Compile Include="MyEngine/Utils.cs" />
+    <Compile Include="MyEngine/Button.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +48,7 @@
     <PackageReference Include="nkast.Xna.Framework.Blazor" Version="3.8.9102" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.11" PrivateAssets="all" />
+    <PackageReference Include="Sprache" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>

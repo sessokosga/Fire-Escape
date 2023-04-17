@@ -24,7 +24,7 @@ namespace WebGLxna.Pages
             // init game
             if (_game == null)
             {
-                _game = new WebGLxnaGame();
+                _game = new MainGame();
                 _game.Run();
             }
 
