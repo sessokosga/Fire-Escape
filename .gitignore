@@ -4,4 +4,4 @@
 */wwwroot/Content/
 *.user
 *.bak
-out/
+*/.vscode
