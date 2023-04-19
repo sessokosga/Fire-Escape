@@ -26,7 +26,12 @@ namespace WebGLxna
         public override void Draw(GameTime gameTime)
         {
             // Debug.WriteLine("Drawing Scene Credits...");
-            mainGame.spriteBatch.DrawString(mainGame.font, "Credits", new Vector2(150, 50), Color.White);
+            var x=300;
+            var y=50;            
+            mainGame.spriteBatch.DrawString(mainGame.font, "Credits", new Vector2(x,y), Color.White);
+            x=100;
+            y+=100;
+            mainGame.spriteBatch.DrawString(mainGame.font, "Game dev : Sesso Kosga\nMusics : Benni", new Vector2(x,y), Color.White);
             base.Draw(gameTime);
         }
     }
