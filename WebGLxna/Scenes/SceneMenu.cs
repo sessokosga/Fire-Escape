@@ -13,7 +13,7 @@ namespace WebGLxna
         private string input;
         private KeyboardState oldKBState;
         private TextInput textInput;
-        private string parsedId;
+        private string parsedInput;
         private List<Prompt> ListPrompts;
         public SceneMenu(MainGame pGame) : base(pGame)
         {
@@ -42,11 +42,10 @@ namespace WebGLxna
                 if (input != "")
                 {
                     if (input.Length > 0)
-                        parsedId = TextParser.Identifier.Parse(input);
+                        parsedInput = TextParser.Identifier.Parse(input);
                 }
-                var result = ProcessInput(parsedId);
+                var result = ProcessInput(parsedInput);
                 ListPrompts.Add(new Prompt(input, result));
-                Console.WriteLine($"Prompts count {ListPrompts.Count}");
                 if (ListPrompts.Count >= 6)
                 {
                     foreach (var p in ListPrompts)
