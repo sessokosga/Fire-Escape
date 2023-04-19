@@ -21,6 +21,10 @@ namespace WebGLxna
 
         private KeyboardState oldKBState;
         private string input;
+        private const int  progressBarWidth=10;
+        private float smokeGauge=0;
+        private const float maxTime=5*60*1000;
+        private float elapsedTime=0;
         private TextInput textInput;
         private string parsedInput;
         private List<Prompt> ListPrompts;
@@ -48,7 +52,13 @@ namespace WebGLxna
 
         public override void Update(GameTime gameTime)
         {
-            Debug.WriteLine("Updating Scene Gameplay...");
+            if(elapsedTime<maxTime){
+            elapsedTime+=gameTime.ElapsedGameTime.Milliseconds;
+            smokeGauge = elapsedTime*(float) progressBarWidth /maxTime;
+            }
+            Console.WriteLine($"Elapsed time : {elapsedTime/(float)1000}, Gauge : {smokeGauge}");
+
+
             /**
                 Handle inputs
             */
@@ -179,7 +189,12 @@ namespace WebGLxna
             var y = 20;
             var inputY = 0;
             mainGame.spriteBatch.DrawString(mainGame.font, "Smoke propagation", new Vector2(700, 20), Color.WhiteSmoke);
-            mainGame.spriteBatch.DrawString(mainGame.font, "|=======        |", new Vector2(720, 45), Color.WhiteSmoke);
+            var gg="";
+            for (var i=0; i<(int)smokeGauge;i++)
+                gg+="=";
+            for (var i=gg.Length;i<progressBarWidth;i++)
+                gg+="  ";                
+            mainGame.spriteBatch.DrawString(mainGame.font, $"|{gg}|", new Vector2(720, 45), Color.WhiteSmoke);
 
             switch (currentRoom)
             {
