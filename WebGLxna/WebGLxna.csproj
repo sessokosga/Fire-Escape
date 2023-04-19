@@ -37,10 +37,12 @@
     <Compile Include="Scenes/SceneGameplay.cs" />
     <Compile Include="Scenes/SceneMenu.cs" />
     <Compile Include="MainGame.cs" />
+    <Compile Include="Prompt.cs" />
     <Compile Include="MyEngine/GameState.cs" />
     <Compile Include="MyEngine/Scene.cs" />
     <Compile Include="MyEngine/Utils.cs" />
     <Compile Include="MyEngine/Button.cs" />
+    <Compile Include="MyEngine/TextInput.cs" />
   </ItemGroup>
 
   <ItemGroup>
