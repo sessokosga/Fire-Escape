@@ -20,6 +20,7 @@ namespace WebGLxna
         }
 
         private KeyboardState oldKBState;
+        private bool victory,failure;
         private string input;
         private const int progressBarWidth = 10;
         private float smokeGauge = 0;
@@ -44,6 +45,8 @@ namespace WebGLxna
             Inventory = new Dictionary<string, string>();
             isKeyAvailable = false;
             isUsing = false;
+            victory=false;
+            failure=false;
             objectUsing = "";
         }
 
@@ -62,10 +65,15 @@ namespace WebGLxna
 
         public override void Update(GameTime gameTime)
         {
+            if(victory)
+                mainGame.gameState.changeScene(GameState.SceneType.Gameover,true);
+
             if (elapsedTime < maxTime)
             {
                 elapsedTime += gameTime.ElapsedGameTime.Milliseconds;
                 smokeGauge = elapsedTime * (float)progressBarWidth / maxTime;
+            }else {
+                mainGame.gameState.changeScene(GameState.SceneType.Gameover,false);                
             }
 
             ListObjects.Clear();
@@ -317,7 +325,7 @@ namespace WebGLxna
                             if (objectUsing == "hammer")
                             {
                                 result = "You broke the box. You found a key in it.";
-                                isKeyAvailable=true;                                
+                                isKeyAvailable=true;
                             }
                         }
                         else
@@ -331,11 +339,13 @@ namespace WebGLxna
                             if (objectUsing == "hammer")
                             {
                                 result = "You broke the door using the hammer. You escaped the house.";
+                                victory=true;
                             }
                             else if (objectUsing == "key")
                             {
                                 result = "You use the key to unlock the door. You escaped the house.";
                                 Inventory.Remove("key");
+                                victory=true;
                             }
                         }
                         else
