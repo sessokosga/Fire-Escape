@@ -26,21 +26,25 @@ namespace WebGLxna
         private bool isKeyAvailable;
         private const float maxTime = 5 * 60 * 1000;
         private float elapsedTime = 0;
-        private Dictionary<string,string> Inventory;
+        private Dictionary<string, string> Inventory;
         private TextInput textInput;
         private string parsedInput;
         private List<Prompt> ListPrompts;
         private RoomType currentRoom;
-        private Dictionary<string,string> ListObjects;
+        private Dictionary<string, string> ListObjects;
+        private bool isUsing;
+        private string objectUsing;
         public SceneGameplay(MainGame pGame) : base(pGame)
         {
             currentRoom = RoomType.Chamber;
             textInput = new TextInput();
             input = textInput.input;
             ListPrompts = new List<Prompt>();
-            ListObjects = new Dictionary<string,string>();            
-            Inventory = new Dictionary<string,string>();
-            isKeyAvailable=false;
+            ListObjects = new Dictionary<string, string>();
+            Inventory = new Dictionary<string, string>();
+            isKeyAvailable = false;
+            isUsing = false;
+            objectUsing = "";
         }
 
         public override void Load()
@@ -65,17 +69,18 @@ namespace WebGLxna
             }
 
             ListObjects.Clear();
-            switch(currentRoom){
+            switch (currentRoom)
+            {
                 case RoomType.Kitchen:
                     if (!Inventory.ContainsKey("hammer"))
-                        ListObjects.Add("hammer","A hammer");
-                break;
+                        ListObjects.Add("hammer", "A hammer");
+                    break;
                 case RoomType.Chamber:
                     if (!isKeyAvailable)
                         ListObjects.Add("box", "A wood box");
-                    if(isKeyAvailable && !Inventory.ContainsKey("key"))
+                    if (isKeyAvailable && !Inventory.ContainsKey("key"))
                         ListObjects.Add("key", "A key");
-                break;
+                    break;
             }
 
             //  Keyboard
@@ -114,7 +119,7 @@ namespace WebGLxna
 
         private string ProcessInput(string parsedInput)
         {
-            var result = "hello kitty";
+            var result = "";
             List<string> wrongDir;
             // Move around
             switch (currentRoom)
@@ -226,25 +231,25 @@ namespace WebGLxna
                     switch (parts[1])
                     {
                         case "hammer":
-                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.ContainsKey(parts[1]) )
+                            if (ListObjects.ContainsKey(parts[1]) || Inventory.ContainsKey(parts[1]))
                                 result = "The hammer is brown, it's hot due to the room temperature";
                             else
                                 result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
                             break;
                         case "box":
-                            if (ListObjects.ContainsKey(parts[1] ))
+                            if (ListObjects.ContainsKey(parts[1]))
                                 result = "The box is made of wood. It's brown.";
                             else
                                 result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
                             break;
                         case "key":
-                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.ContainsKey(parts[1]) )
+                            if (ListObjects.ContainsKey(parts[1]) || Inventory.ContainsKey(parts[1]))
                                 result = "It is a little, old fashioned key.";
                             else
                                 result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
                             break;
                         case "door":
-                                result = "It's dark, huge, and robust.";
+                            result = "It's dark, huge, and robust.";
                             break;
                         default:
                             result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
@@ -265,10 +270,11 @@ namespace WebGLxna
                     switch (parts[1])
                     {
                         case "hammer":
-                            if (ListObjects.ContainsKey(parts[1] ) ){
-                                Inventory.Add(parts[1],ListObjects[parts[1]]);
+                            if (ListObjects.ContainsKey(parts[1]))
+                            {
+                                Inventory.Add(parts[1], ListObjects[parts[1]]);
                                 ListObjects.Remove(parts[1]);
-                                result=$"You've taken the {parts[1]}";
+                                result = $"You've taken the {parts[1]}";
                             }
                             else
                                 result = $"This object ({parts[1]}) is not in this room.";
@@ -277,16 +283,17 @@ namespace WebGLxna
                             result = "You can't take the box.";
                             break;
                         case "key":
-                            if (ListObjects.ContainsKey(parts[1] ) ){
-                                Inventory.Add(parts[1],ListObjects[parts[1]]);
+                            if (ListObjects.ContainsKey(parts[1]))
+                            {
+                                Inventory.Add(parts[1], ListObjects[parts[1]]);
                                 ListObjects.Remove(parts[1]);
-                                result=$"You've taken the {parts[1]}";
+                                result = $"You've taken the {parts[1]}";
                             }
                             else
                                 result = $"This object ({parts[1]}) is not in this room.";
                             break;
                         case "door":
-                                result = "You can't take the door.";
+                            result = "You can't take the door.";
                             break;
                         default:
                             result = $"This object ({parts[1]}) is not in this room.";
@@ -299,6 +306,100 @@ namespace WebGLxna
                 }
             }
 
+            // Use objects            
+            if (isUsing)
+            {
+                switch (parsedInput)
+                {
+                    case "box":
+                        if (ListObjects.ContainsKey("box"))
+                        {
+                            if (objectUsing == "hammer")
+                            {
+                                result = "You broke the box. You found a key in it.";
+                                isKeyAvailable=true;                                
+                            }
+                        }
+                        else
+                        {
+                            result = $"There is no box in this room";
+                        }
+                        break;
+                    case "door":
+                        if (currentRoom == RoomType.Principal)
+                        {
+                            if (objectUsing == "hammer")
+                            {
+                                result = "You broke the door using the hammer. You escaped the house.";
+                            }
+                            else if (objectUsing == "key")
+                            {
+                                result = "You use the key to unlock the door. You escaped the house.";
+                                Inventory.Remove("key");
+                            }
+                        }
+                        else
+                        {
+                            if (objectUsing == "hammer")
+                            {
+                                result = $"You broke the {currentRoom.ToString()} door. That's useless. That door was open anyway";
+                            }
+                            else if (objectUsing == "key")
+                            {
+                                result = $"There is no need to do that. The {currentRoom.ToString()} door is already open.";
+                            }
+                        }
+                        break;
+                    default:
+                        result = "You can't do that";
+                        break;
+                }
+                isUsing = false;
+                objectUsing = "";
+            }
+
+            if (parts[0] == "use")
+            {
+                if (parts.Length > 1)
+                {
+                    switch (parts[1])
+                    {
+                        case "hammer":
+                            if (Inventory.ContainsKey(parts[1]))
+                            {
+                                result = "What do you wanna break with that hammer ?";
+                                isUsing = true;
+                                objectUsing = parts[1];
+                            }
+                            else
+                                result = $"You don't have a hammer in your imventory";
+                            break;
+                        case "box":
+                            result = "You can't use the box.";
+                            break;
+                        case "key":
+                            if (Inventory.ContainsKey(parts[1]))
+                            {
+                                result = $"So what do you wanna open with that key";
+                                isUsing = true;
+                                objectUsing = parts[1];
+                            }
+                            else
+                                result = "You don't have a key in your inventory";
+                            break;
+                        case "door":
+                            result = "You can't use the door.";
+                            break;
+                        default:
+                            result = $"This object ({parts[1]}) is not in your inventory.";
+                            break;
+                    }
+                }
+                else
+                {
+                    result = $"Please specify which object you want to {parts[0]}";
+                }
+            }
             return result;
         }
 
@@ -329,8 +430,9 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
-                    foreach(var item in Inventory){
-                        y+=25;
+                    foreach (var item in Inventory)
+                    {
+                        y += 25;
                         mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
                     }
                     y += 40;
@@ -356,8 +458,9 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
-                    foreach(var item in Inventory){
-                        y+=25;
+                    foreach (var item in Inventory)
+                    {
+                        y += 25;
                         mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
                     }
                     y += 40;
@@ -381,8 +484,9 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
-                    foreach(var item in Inventory){
-                        y+=25;
+                    foreach (var item in Inventory)
+                    {
+                        y += 25;
                         mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
                     }
                     y += 40;
@@ -403,8 +507,9 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
-                    foreach(var item in Inventory){
-                        y+=25;
+                    foreach (var item in Inventory)
+                    {
+                        y += 25;
                         mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
                     }
                     y += 40;
@@ -426,8 +531,9 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
-                    foreach(var item in Inventory){
-                        y+=25;
+                    foreach (var item in Inventory)
+                    {
+                        y += 25;
                         mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
                     }
                     y += 40;
