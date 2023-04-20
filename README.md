@@ -1,5 +1,54 @@
+# Fire Escape
+
+A Text based Adventure Game.
+
+Made for the [Gamedev.js game jam]()
+
+### Theme : TIME
+
+### How the theme is implemented : 
+
+This game is a text-based adventure game, it is an escape game where the player has to escape from a burning house. The time component is implemented through a gauge bar showing what percentage of the house is filled with smoke. The player has to escape the house before it gets filled by smoke. 
+
+There is a time constraint, the player has to get out as fast as possible.
+
+### Synopsis : 
+
+You wake up in your bed, in your house. There's something unusual; you're smelling something strange, it's smoke. Suddenly, you realize that your house is on fire. You get up and start looking for a way to escape the burning house. 
+
+Hurry up, get out of the house before it gets filled with smoke.
+
+### Language / Framework: C# / Monogame
+
+### Get on itch.io : 
+
+### Controls :
+
+You can move between the rooms using directions: west(w), east(e), south(s) and north(n). You perform actions by inputting commands.
+
+
+### Code : by me
+
+### Music : Benni
+
+### Graphism : None
+
+### Development duration : 
+
+### Post mortem
+
+
+### Screenshots
+
+
+by Sesso Kosga kosgasesso@gmail.com
+
+
 # WebGLxnaProj
+
+
 Test project for xna Blazor
+
 
 This is a testbed for BlazorGL platform of the [KNI](https://github.com/kniEngine/kni) framework.
 
