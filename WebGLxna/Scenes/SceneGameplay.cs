@@ -26,7 +26,7 @@ namespace WebGLxna
         private bool isKeyAvailable;
         private const float maxTime = 5 * 60 * 1000;
         private float elapsedTime = 0;
-        private List<string> Inventory;
+        private Dictionary<string,string> Inventory;
         private TextInput textInput;
         private string parsedInput;
         private List<Prompt> ListPrompts;
@@ -38,8 +38,8 @@ namespace WebGLxna
             textInput = new TextInput();
             input = textInput.input;
             ListPrompts = new List<Prompt>();
-            ListObjects = new Dictionary<string,string>();
-            Inventory = new List<string>();
+            ListObjects = new Dictionary<string,string>();            
+            Inventory = new Dictionary<string,string>();
             isKeyAvailable=false;
         }
 
@@ -67,23 +67,21 @@ namespace WebGLxna
             ListObjects.Clear();
             switch(currentRoom){
                 case RoomType.Kitchen:
-                    if (!Inventory.Contains("hammer"))
+                    if (!Inventory.ContainsKey("hammer"))
                         ListObjects.Add("hammer","A hammer");
                 break;
                 case RoomType.Chamber:
                     if (!isKeyAvailable)
                         ListObjects.Add("box", "A wood box");
-                    else
+                    if(isKeyAvailable && !Inventory.ContainsKey("key"))
                         ListObjects.Add("key", "A key");
-                    
-                    
                 break;
             }
 
             //  Keyboard
             KeyboardState newKBState = Keyboard.GetState();
             textInput.Update(gameTime, newKBState, oldKBState);
-            input = textInput.input.TrimStart();
+            input = textInput.input.Trim();
             if (newKBState.IsKeyDown(Keys.Enter) && !oldKBState.IsKeyDown(Keys.Enter))
             {
                 if (input != "")
@@ -92,7 +90,7 @@ namespace WebGLxna
                         parsedInput = TextParser.Identifier.Parse(input);
                 }
                 var parts = input.Split(" ");
-                if (parts.Length > 1 && (parsedInput == "describe" || parsedInput == "take" || parsedInput == "use"))
+                if (parts.Length > 1 && (parsedInput == "desc" || parsedInput == "describe" || parsedInput == "take" || parsedInput == "use"))
                 {
                     parsedInput += " " + parts[1];
                 }
@@ -221,14 +219,14 @@ namespace WebGLxna
             }
             var parts = parsedInput.Split(" ");
             // Describe objects
-            if (parts[0] == "describe")
+            if (parts[0] == "describe" || parts[0] == "desc")
             {
                 if (parts.Length > 1)
                 {
                     switch (parts[1])
                     {
                         case "hammer":
-                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.Contains(parts[1]) )
+                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.ContainsKey(parts[1]) )
                                 result = "The hammer is brown, it's hot due to the room temperature";
                             else
                                 result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
@@ -240,7 +238,7 @@ namespace WebGLxna
                                 result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
                             break;
                         case "key":
-                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.Contains(parts[1]) )
+                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.ContainsKey(parts[1]) )
                                 result = "It is a little, old fashioned key.";
                             else
                                 result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
@@ -256,6 +254,48 @@ namespace WebGLxna
                 else
                 {
                     result = $"Please specify which object you want me to {parts[0]}";
+                }
+            }
+
+            // Take objects
+            if (parts[0] == "take")
+            {
+                if (parts.Length > 1)
+                {
+                    switch (parts[1])
+                    {
+                        case "hammer":
+                            if (ListObjects.ContainsKey(parts[1] ) ){
+                                Inventory.Add(parts[1],ListObjects[parts[1]]);
+                                ListObjects.Remove(parts[1]);
+                                result=$"You've taken the {parts[1]}";
+                            }
+                            else
+                                result = $"This object ({parts[1]}) is not in this room.";
+                            break;
+                        case "box":
+                            result = "You can't take the box.";
+                            break;
+                        case "key":
+                            if (ListObjects.ContainsKey(parts[1] ) ){
+                                Inventory.Add(parts[1],ListObjects[parts[1]]);
+                                ListObjects.Remove(parts[1]);
+                                result=$"You've taken the {parts[1]}";
+                            }
+                            else
+                                result = $"This object ({parts[1]}) is not in this room.";
+                            break;
+                        case "door":
+                                result = "You can't take the door.";
+                            break;
+                        default:
+                            result = $"This object ({parts[1]}) is not in this room.";
+                            break;
+                    }
+                }
+                else
+                {
+                    result = $"Please specify which object you want to {parts[0]}";
                 }
             }
 
@@ -289,6 +329,10 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
+                    foreach(var item in Inventory){
+                        y+=25;
+                        mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
+                    }
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Objects", new Vector2(x, y), Color.White);
                     y += 25;
@@ -312,6 +356,10 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
+                    foreach(var item in Inventory){
+                        y+=25;
+                        mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
+                    }
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Objects", new Vector2(x, y), Color.White);
                     y += 25;
@@ -333,6 +381,10 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
+                    foreach(var item in Inventory){
+                        y+=25;
+                        mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
+                    }
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Objects", new Vector2(x, y), Color.White);
                     y += 40;
@@ -351,6 +403,10 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
+                    foreach(var item in Inventory){
+                        y+=25;
+                        mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
+                    }
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Objects", new Vector2(x, y), Color.White);
                     y += 40;
@@ -370,6 +426,10 @@ namespace WebGLxna
                     x += 700;
                     y = 90;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Inventory", new Vector2(x, y), Color.White);
+                    foreach(var item in Inventory){
+                        y+=25;
+                        mainGame.spriteBatch.DrawString(mainGame.font, item.Value, new Vector2(x + 30, y), Color.White);
+                    }
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Objects", new Vector2(x, y), Color.White);
                     y += 40;
