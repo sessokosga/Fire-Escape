@@ -21,20 +21,26 @@ namespace WebGLxna
 
         private KeyboardState oldKBState;
         private string input;
-        private const int  progressBarWidth=10;
-        private float smokeGauge=0;
-        private const float maxTime=5*60*1000;
-        private float elapsedTime=0;
+        private const int progressBarWidth = 10;
+        private float smokeGauge = 0;
+        private bool isKeyAvailable;
+        private const float maxTime = 5 * 60 * 1000;
+        private float elapsedTime = 0;
+        private List<string> Inventory;
         private TextInput textInput;
         private string parsedInput;
         private List<Prompt> ListPrompts;
         private RoomType currentRoom;
+        private Dictionary<string,string> ListObjects;
         public SceneGameplay(MainGame pGame) : base(pGame)
         {
             currentRoom = RoomType.Chamber;
             textInput = new TextInput();
             input = textInput.input;
             ListPrompts = new List<Prompt>();
+            ListObjects = new Dictionary<string,string>();
+            Inventory = new List<string>();
+            isKeyAvailable=false;
         }
 
         public override void Load()
@@ -52,20 +58,27 @@ namespace WebGLxna
 
         public override void Update(GameTime gameTime)
         {
-            if(elapsedTime<maxTime){
-            elapsedTime+=gameTime.ElapsedGameTime.Milliseconds;
-            smokeGauge = elapsedTime*(float) progressBarWidth /maxTime;
+            if (elapsedTime < maxTime)
+            {
+                elapsedTime += gameTime.ElapsedGameTime.Milliseconds;
+                smokeGauge = elapsedTime * (float)progressBarWidth / maxTime;
             }
-            Console.WriteLine($"Elapsed time : {elapsedTime/(float)1000}, Gauge : {smokeGauge}");
 
-
-            /**
-                Handle inputs
-            */
-            // Mouse
-            // MouseState mouseState = Mouse.GetState();
-            // Debug.WriteLine(mouseState.X+", "+mouseState.Y+", "+mouseState.LeftButton);
-
+            ListObjects.Clear();
+            switch(currentRoom){
+                case RoomType.Kitchen:
+                    if (!Inventory.Contains("hammer"))
+                        ListObjects.Add("hammer","A hammer");
+                break;
+                case RoomType.Chamber:
+                    if (!isKeyAvailable)
+                        ListObjects.Add("box", "A wood box");
+                    else
+                        ListObjects.Add("key", "A key");
+                    
+                    
+                break;
+            }
 
             //  Keyboard
             KeyboardState newKBState = Keyboard.GetState();
@@ -77,6 +90,11 @@ namespace WebGLxna
                 {
                     if (input.Length > 0)
                         parsedInput = TextParser.Identifier.Parse(input);
+                }
+                var parts = input.Split(" ");
+                if (parts.Length > 1 && (parsedInput == "describe" || parsedInput == "take" || parsedInput == "use"))
+                {
+                    parsedInput += " " + parts[1];
                 }
                 var result = ProcessInput(parsedInput);
                 ListPrompts.Add(new Prompt(input, result));
@@ -100,88 +118,150 @@ namespace WebGLxna
         {
             var result = "hello kitty";
             List<string> wrongDir;
+            // Move around
             switch (currentRoom)
             {
                 case RoomType.Kitchen:
-                    wrongDir= new List<string>{"w","s","n","west","south","north"};
+                    wrongDir = new List<string> { "w", "s", "n", "west", "south", "north" };
                     if (parsedInput == "e" || parsedInput == "east")
                     {
                         currentRoom = RoomType.Couloir1;
-                        result="You entered in Couloir #1";
-                    }else if(wrongDir.Contains(parsedInput)){
+                        result = "You entered in Couloir #1";
+                    }
+                    else if (wrongDir.Contains(parsedInput))
+                    {
                         result = "You can't go that direction";
-                    }else{
+                    }
+                    else
+                    {
                         result = "I don't understand what you just said.";
                     }
-                    
+
                     break;
                 case RoomType.Chamber:
-                wrongDir= new List<string>{"s","n","e","south","north","east"};
+                    wrongDir = new List<string> { "s", "n", "e", "south", "north", "east" };
                     if (parsedInput == "w" || parsedInput == "west")
                     {
                         currentRoom = RoomType.Couloir2;
-                        result="You entered in Couloir #2";
-                    }else if(wrongDir.Contains(parsedInput)){
+                        result = "You entered in Couloir #2";
+                    }
+                    else if (wrongDir.Contains(parsedInput))
+                    {
                         result = "You can't go that direction";
-                    }else{
+                    }
+                    else
+                    {
                         result = "I don't understand what you just said.";
                     }
                     break;
                 case RoomType.Couloir1:
-                wrongDir= new List<string>{"s","n","south","north"};
+                    wrongDir = new List<string> { "s", "n", "south", "north" };
                     if (parsedInput == "e" || parsedInput == "east")
                     {
                         currentRoom = RoomType.Principal;
-                        result="You entered in the principal room";
+                        result = "You entered in the principal room";
                     }
                     else if (parsedInput == "w" || parsedInput == "west")
                     {
                         currentRoom = RoomType.Kitchen;
-                        result="You are in the kitchen";
-                    }else if(wrongDir.Contains(parsedInput)){
+                        result = "You are in the kitchen";
+                    }
+                    else if (wrongDir.Contains(parsedInput))
+                    {
                         result = "You can't go that direction";
-                    }else{
+                    }
+                    else
+                    {
                         result = "I don't understand what you just said.";
                     }
                     break;
                 case RoomType.Couloir2:
-                wrongDir= new List<string>{"w","s","west","south"};
+                    wrongDir = new List<string> { "w", "s", "west", "south" };
                     if (parsedInput == "e" || parsedInput == "east")
                     {
                         currentRoom = RoomType.Chamber;
-                        result="You entered in your chamber";
+                        result = "You entered in your chamber";
                     }
                     else if (parsedInput == "n" || parsedInput == "north")
                     {
                         currentRoom = RoomType.Principal;
-                        result="You are in the principal room";
-                    }else if(wrongDir.Contains(parsedInput)){
+                        result = "You are in the principal room";
+                    }
+                    else if (wrongDir.Contains(parsedInput))
+                    {
                         result = "You can't go that direction";
-                    }else{
+                    }
+                    else
+                    {
                         result = "I don't understand what you just said.";
                     }
                     break;
                 case RoomType.Principal:
-                wrongDir= new List<string>{"n","e","north","east"};
+                    wrongDir = new List<string> { "n", "e", "north", "east" };
                     if (parsedInput == "s" || parsedInput == "south")
                     {
                         currentRoom = RoomType.Couloir2;
-                        result="You are in Couloir #2";
+                        result = "You are in Couloir #2";
                     }
                     else if (parsedInput == "w" || parsedInput == "west")
                     {
                         currentRoom = RoomType.Couloir1;
-                        result="You are in Couloir #1";
-                    }else if(wrongDir.Contains(parsedInput)){
+                        result = "You are in Couloir #1";
+                    }
+                    else if (wrongDir.Contains(parsedInput))
+                    {
                         result = "You can't go that direction";
-                    }else{
+                    }
+                    else
+                    {
                         result = "I don't understand what you just said.";
                     }
                     break;
 
             }
+            var parts = parsedInput.Split(" ");
+            // Describe objects
+            if (parts[0] == "describe")
+            {
+                if (parts.Length > 1)
+                {
+                    switch (parts[1])
+                    {
+                        case "hammer":
+                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.Contains(parts[1]) )
+                                result = "The hammer is brown, it's hot due to the room temperature";
+                            else
+                                result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
+                            break;
+                        case "box":
+                            if (ListObjects.ContainsKey(parts[1] ))
+                                result = "The box is made of wood. It's brown.";
+                            else
+                                result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
+                            break;
+                        case "key":
+                            if (ListObjects.ContainsKey(parts[1] )|| Inventory.Contains(parts[1]) )
+                                result = "It is a little, old fashioned key.";
+                            else
+                                result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
+                            break;
+                        case "door":
+                                result = "It's dark, huge, and robust.";
+                            break;
+                        default:
+                            result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
+                            break;
+                    }
+                }
+                else
+                {
+                    result = $"Please specify which object you want me to {parts[0]}";
+                }
+            }
+
             return result;
         }
+
 
         public override void Draw(GameTime gameTime)
         {
@@ -189,11 +269,11 @@ namespace WebGLxna
             var y = 20;
             var inputY = 0;
             mainGame.spriteBatch.DrawString(mainGame.font, "Smoke propagation", new Vector2(700, 20), Color.WhiteSmoke);
-            var gg="";
-            for (var i=0; i<(int)smokeGauge;i++)
-                gg+="=";
-            for (var i=gg.Length;i<progressBarWidth;i++)
-                gg+="  ";                
+            var gg = "";
+            for (var i = 0; i < (int)smokeGauge; i++)
+                gg += "=";
+            for (var i = gg.Length; i < progressBarWidth; i++)
+                gg += "  ";
             mainGame.spriteBatch.DrawString(mainGame.font, $"|{gg}|", new Vector2(720, 45), Color.WhiteSmoke);
 
             switch (currentRoom)
@@ -212,7 +292,10 @@ namespace WebGLxna
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Objects", new Vector2(x, y), Color.White);
                     y += 25;
-                    mainGame.spriteBatch.DrawString(mainGame.font, "A wood box", new Vector2(x + 30, y), Color.White);
+                    if (ListObjects.ContainsKey("box"))
+                        mainGame.spriteBatch.DrawString(mainGame.font, ListObjects["box"], new Vector2(x + 30, y), Color.White);
+                    if (ListObjects.ContainsKey("key"))
+                        mainGame.spriteBatch.DrawString(mainGame.font, ListObjects["key"], new Vector2(x + 30, y), Color.White);
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Compass", new Vector2(x, y), Color.White);
                     y += 25;
@@ -232,7 +315,8 @@ namespace WebGLxna
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Objects", new Vector2(x, y), Color.White);
                     y += 25;
-                    mainGame.spriteBatch.DrawString(mainGame.font, "A Hammer", new Vector2(x + 30, y), Color.White);
+                    if (ListObjects.ContainsKey("hammer"))
+                        mainGame.spriteBatch.DrawString(mainGame.font, ListObjects["hammer"], new Vector2(x + 30, y), Color.White);
                     y += 40;
                     mainGame.spriteBatch.DrawString(mainGame.font, "-> Compass", new Vector2(x, y), Color.White);
                     y += 25;
