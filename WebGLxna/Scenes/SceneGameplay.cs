@@ -249,13 +249,13 @@ namespace WebGLxna
                             if (ListObjects.ContainsKey(parts[1]))
                                 result = "The box is made of wood. It's brown.";
                             else
-                                result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
+                                result = $"There is no {parts[1]} in this room";
                             break;
                         case "key":
                             if (ListObjects.ContainsKey(parts[1]) || Inventory.ContainsKey(parts[1]))
                                 result = "It is a little, old fashioned key.";
                             else
-                                result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
+                                result = $"There is no {parts[1]} in this room neither in your inventory.";
                             break;
                         case "door":
                             result = "It's dark, huge, and robust.";
@@ -267,7 +267,7 @@ namespace WebGLxna
                 }
                 else
                 {
-                    result = $"Please specify which object you want me to {parts[0]}";
+                    result = $"Please specify which object you want me to describe";
                 }
             }
 
@@ -289,7 +289,10 @@ namespace WebGLxna
                                 result = $"This object ({parts[1]}) is not in this room.";
                             break;
                         case "box":
-                            result = "You can't take the box.";
+                            if(currentRoom==RoomType.Chamber)
+                                result = "The box is very heavy. You can't take it.";
+                            else
+                                result = "There isn't a box here.";
                             break;
                         case "key":
                             if (ListObjects.ContainsKey(parts[1]))
@@ -299,7 +302,7 @@ namespace WebGLxna
                                 result = $"You've taken the {parts[1]}";
                             }
                             else
-                                result = $"This object ({parts[1]}) is not in this room.";
+                                result = $"There is no key in this room.";
                             break;
                         case "door":
                             result = "You can't take the door.";
@@ -311,7 +314,7 @@ namespace WebGLxna
                 }
                 else
                 {
-                    result = $"Please specify which object you want to {parts[0]}";
+                    result = $"Please specify which object you want to take";
                 }
             }
 
@@ -331,7 +334,7 @@ namespace WebGLxna
                         }
                         else
                         {
-                            result = $"There is no box in this room";
+                            result = "There is no box in this room";
                         }
                         break;
                     case "door":
@@ -401,7 +404,7 @@ namespace WebGLxna
                                 result = "You don't have a key in your inventory";
                             break;
                         case "door":
-                            result = "You can't use the door.";
+                            result = "You can't use that door.";
                             break;
                         default:
                             result = $"This object ({parts[1]}) is not in your inventory.";
