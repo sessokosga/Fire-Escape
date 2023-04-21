@@ -20,7 +20,7 @@ namespace WebGLxna
         }
 
         private KeyboardState oldKBState;
-        private bool victory,failure;
+        private bool victory;
         private string input;
         private const int progressBarWidth = 10;
         private float smokeGauge = 0;
@@ -35,8 +35,10 @@ namespace WebGLxna
         private Dictionary<string, string> ListObjects;
         private bool isUsing;
         private string objectUsing;
+        private string endingMessage;
         public SceneGameplay(MainGame pGame) : base(pGame)
         {
+            endingMessage="";
             currentRoom = RoomType.Chamber;
             textInput = new TextInput();
             input = textInput.input;
@@ -46,7 +48,6 @@ namespace WebGLxna
             isKeyAvailable = false;
             isUsing = false;
             victory=false;
-            failure=false;
             objectUsing = "";
         }
 
@@ -66,14 +67,14 @@ namespace WebGLxna
         public override void Update(GameTime gameTime)
         {
             if(victory)
-                mainGame.gameState.changeScene(GameState.SceneType.Gameover,true);
+                mainGame.gameState.changeScene(GameState.SceneType.Gameover,true,endingMessage);
 
             if (elapsedTime < maxTime)
             {
                 elapsedTime += gameTime.ElapsedGameTime.Milliseconds;
                 smokeGauge = elapsedTime * (float)progressBarWidth / maxTime;
             }else {
-                mainGame.gameState.changeScene(GameState.SceneType.Gameover,false);                
+                mainGame.gameState.changeScene(GameState.SceneType.Gameover,false,"The smoke filled the house and you suffocated");                
             }
 
             ListObjects.Clear();
@@ -242,7 +243,7 @@ namespace WebGLxna
                             if (ListObjects.ContainsKey(parts[1]) || Inventory.ContainsKey(parts[1]))
                                 result = "The hammer is brown, it's hot due to the room temperature";
                             else
-                                result = $"This object ({parts[1]}) is neither in your inventory, nor in this room.";
+                                result = $"There is no {parts[1]} in this room neither in your inventory.";
                             break;
                         case "box":
                             if (ListObjects.ContainsKey(parts[1]))
@@ -338,13 +339,15 @@ namespace WebGLxna
                         {
                             if (objectUsing == "hammer")
                             {
-                                result = "You broke the door using the hammer. You escaped the house.";
+                                result = "You broke the door using the hammer.\nYou escaped the house.";
+                                endingMessage = result;
                                 victory=true;
                             }
                             else if (objectUsing == "key")
                             {
-                                result = "You use the key to unlock the door. You escaped the house.";
+                                result = "You use the key to unlock the door.\nYou escaped the house.";
                                 Inventory.Remove("key");
+                                endingMessage = result;
                                 victory=true;
                             }
                         }

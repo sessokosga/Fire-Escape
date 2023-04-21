@@ -31,7 +31,7 @@ public class MainGame : Game
     {
         font = _spriteFont.font;
         spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
-        gameState.changeScene(GameState.SceneType.Menu);
+        gameState.changeScene(GameState.SceneType.Gameplay);
     }
 
     protected override void Update(GameTime gameTime)

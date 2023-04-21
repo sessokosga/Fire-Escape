@@ -18,7 +18,7 @@ public class GameState
         mainGame = pGame;
     }
 
-    public void changeScene(SceneType pSceneType, bool victory=false)
+    public void changeScene(SceneType pSceneType, bool victory=false, string message="")
     {
         if (currentScene != null)
         {
@@ -34,7 +34,7 @@ public class GameState
                 currentScene = new SceneGameplay(mainGame);
                 break;
             case SceneType.Gameover:
-                currentScene = new SceneGameover(mainGame,victory);
+                currentScene = new SceneGameover(mainGame,victory,message);
                 break;
             case SceneType.Credits:
                 currentScene = new SceneCredits(mainGame);
