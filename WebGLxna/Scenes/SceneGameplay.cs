@@ -22,6 +22,10 @@ namespace WebGLxna
         private KeyboardState oldKBState;
         private bool victory;
         private string input;
+        private bool isWriting;
+        private float textTimer;
+        private int writedCharacter;
+        private const float maxTextSpeed = .06f;
         private const int progressBarWidth = 10;
         private float smokeGauge = 0;
         private bool isKeyAvailable;
@@ -38,7 +42,7 @@ namespace WebGLxna
         private string endingMessage;
         public SceneGameplay(MainGame pGame) : base(pGame)
         {
-            endingMessage="";
+            endingMessage = "";
             currentRoom = RoomType.Chamber;
             textInput = new TextInput();
             input = textInput.input;
@@ -47,8 +51,11 @@ namespace WebGLxna
             Inventory = new Dictionary<string, string>();
             isKeyAvailable = false;
             isUsing = false;
-            victory=false;
+            victory = false;
             objectUsing = "";
+            isWriting = false;
+            textTimer = 0;
+            writedCharacter = 0;
         }
 
         public override void Load()
@@ -66,15 +73,28 @@ namespace WebGLxna
 
         public override void Update(GameTime gameTime)
         {
-            if(victory)
-                mainGame.gameState.changeScene(GameState.SceneType.Gameover,true,endingMessage);
+
+            if (isWriting)
+            {
+                textTimer += gameTime.ElapsedGameTime.Milliseconds / (float)1000;
+                if (textTimer >= maxTextSpeed)
+                {
+                    textTimer = 0;
+                    writedCharacter++;
+                }
+            }
+
+            if (victory)
+                mainGame.gameState.changeScene(GameState.SceneType.Gameover, true, endingMessage);
 
             if (elapsedTime < maxTime)
             {
                 elapsedTime += gameTime.ElapsedGameTime.Milliseconds;
                 smokeGauge = elapsedTime * (float)progressBarWidth / maxTime;
-            }else {
-                mainGame.gameState.changeScene(GameState.SceneType.Gameover,false,"The smoke filled the house and you suffocated");                
+            }
+            else
+            {
+                mainGame.gameState.changeScene(GameState.SceneType.Gameover, false, "The smoke filled the house and you suffocated");
             }
 
             ListObjects.Clear();
@@ -93,35 +113,38 @@ namespace WebGLxna
             }
 
             //  Keyboard
-            KeyboardState newKBState = Keyboard.GetState();
-            textInput.Update(gameTime, newKBState, oldKBState);
-            input = textInput.input.Trim();
-            if (newKBState.IsKeyDown(Keys.Enter) && !oldKBState.IsKeyDown(Keys.Enter))
+            if (isWriting == false)
             {
-                if (input != "")
+                KeyboardState newKBState = Keyboard.GetState();
+                textInput.Update(gameTime, newKBState, oldKBState);
+                input = textInput.input.Trim();
+                if (newKBState.IsKeyDown(Keys.Enter) && !oldKBState.IsKeyDown(Keys.Enter))
                 {
-                    if (input.Length > 0)
-                        parsedInput = TextParser.Identifier.Parse(input);
-                }
-                var parts = input.Split(" ");
-                if (parts.Length > 1 && (parsedInput == "desc" || parsedInput == "describe" || parsedInput == "take" || parsedInput == "use"))
-                {
-                    parsedInput += " " + parts[1];
-                }
-                var result = ProcessInput(parsedInput);
-                ListPrompts.Add(new Prompt(input, result));
-                if (ListPrompts.Count >= 6)
-                {
-                    foreach (var p in ListPrompts)
+                    if (input != "")
                     {
-                        ListPrompts.Remove(p);
-                        break;
+                        if (input.Length > 0)
+                            parsedInput = TextParser.Identifier.Parse(input);
                     }
+                    var parts = input.Split(" ");
+                    if (parts.Length > 1 && (parsedInput == "desc" || parsedInput == "describe" || parsedInput == "take" || parsedInput == "use"))
+                    {
+                        parsedInput += " " + parts[1];
+                    }
+                    var result = ProcessInput(parsedInput);
+                    ListPrompts.Add(new Prompt(input, result));
+                    if (ListPrompts.Count >= 6)
+                    {
+                        foreach (var p in ListPrompts)
+                        {
+                            ListPrompts.Remove(p);
+                            break;
+                        }
+                    }
+                    input = "";
+                    textInput.input = "";
                 }
-                input = "";
-                textInput.input = "";
+                oldKBState = newKBState;
             }
-            oldKBState = newKBState;
 
             base.Update(gameTime);
         }
@@ -129,6 +152,9 @@ namespace WebGLxna
         private string ProcessInput(string parsedInput)
         {
             var result = "";
+            textTimer = 0;
+            writedCharacter = 0;
+            isWriting = true;
             List<string> wrongDir;
             // Move around
             switch (currentRoom)
@@ -289,7 +315,7 @@ namespace WebGLxna
                                 result = $"This object ({parts[1]}) is not in this room.";
                             break;
                         case "box":
-                            if(currentRoom==RoomType.Chamber)
+                            if (currentRoom == RoomType.Chamber)
                                 result = "The box is very heavy. You can't take it.";
                             else
                                 result = "There isn't a box here.";
@@ -329,7 +355,7 @@ namespace WebGLxna
                             if (objectUsing == "hammer")
                             {
                                 result = "You broke the box. You found a key in it.";
-                                isKeyAvailable=true;
+                                isKeyAvailable = true;
                             }
                         }
                         else
@@ -344,14 +370,14 @@ namespace WebGLxna
                             {
                                 result = "You broke the door using the hammer.\nYou escaped the house.";
                                 endingMessage = result;
-                                victory=true;
+                                victory = true;
                             }
                             else if (objectUsing == "key")
                             {
                                 result = "You use the key to unlock the door.\nYou escaped the house.";
                                 Inventory.Remove("key");
                                 endingMessage = result;
-                                victory=true;
+                                victory = true;
                             }
                         }
                         else
@@ -562,13 +588,28 @@ namespace WebGLxna
             }
             x = 20;
             y = inputY;
+            var c = 0;
             foreach (var p in ListPrompts)
             {
-                mainGame.spriteBatch.DrawString(mainGame.font, $">{p.input}\n{p.result}", new Vector2(x, y), Color.White);
-                y += 60;
+                c++;
+                mainGame.spriteBatch.DrawString(mainGame.font, $">{p.input}", new Vector2(x, y), Color.White);
+                y += 25;
+
+                if (c == ListPrompts.Count && isWriting)
+                {
+                    if (writedCharacter == p.result.Length)
+                        isWriting = false;
+                    mainGame.spriteBatch.DrawString(mainGame.font, $"{p.result.Substring(0, writedCharacter)}", new Vector2(x, y), Color.White);
+                }
+                else
+                {
+                    mainGame.spriteBatch.DrawString(mainGame.font, $"{p.result}", new Vector2(x, y), Color.White);
+                }
+                y += 30;
             }
-            // y += 25;
-            mainGame.spriteBatch.DrawString(mainGame.font, $">{input}", new Vector2(x, y), Color.White);
+
+            if (isWriting == false)
+                mainGame.spriteBatch.DrawString(mainGame.font, $">{input}", new Vector2(x, y), Color.White);
             base.Draw(gameTime);
         }
     }

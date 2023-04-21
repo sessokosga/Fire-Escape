@@ -5,7 +5,17 @@ namespace WebGLxna
 {
     public class SceneCredits : Scene
     {
-        public SceneCredits(MainGame pGame) : base(pGame) { }
+        private bool isWriting;
+        private float textTimer;
+        private int writedCharacter;
+        private string text;
+        private const float maxTextSpeed = .06f;
+        public SceneCredits(MainGame pGame) : base(pGame) { 
+            isWriting = true;
+            textTimer = 0;
+            writedCharacter = 0;
+            text = "Game dev : Sesso Kosga\n\n         Musics : Benni";
+        }
 
 
         public override void Load()
@@ -20,7 +30,15 @@ namespace WebGLxna
 
         public override void Update(GameTime gameTime)
         {
-            // Debug.WriteLine("Updating Scene Credits...");
+            if (isWriting)
+            {
+                textTimer += gameTime.ElapsedGameTime.Milliseconds / (float)1000;
+                if (textTimer >= maxTextSpeed)
+                {
+                    textTimer = 0;
+                    writedCharacter++;
+                }
+            }
             base.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
@@ -29,9 +47,16 @@ namespace WebGLxna
             var x=300;
             var y=50;            
             mainGame.spriteBatch.DrawString(mainGame.font, "Credits", new Vector2(x,y), Color.White);
-            x=100;
-            y+=100;
-            mainGame.spriteBatch.DrawString(mainGame.font, "Game dev : Sesso Kosga\nMusics : Benni", new Vector2(x,y), Color.White);
+            x=230;
+            y+=80;
+            if (isWriting)
+            {
+                mainGame.spriteBatch.DrawString(mainGame.font, text.Substring(0,writedCharacter), new Vector2(x,y), Color.White);
+                if (writedCharacter == text.Length)
+                    isWriting=false;
+            }else{
+            mainGame.spriteBatch.DrawString(mainGame.font, text, new Vector2(x,y), Color.White);
+            }
             base.Draw(gameTime);
         }
     }
