@@ -25,12 +25,14 @@ Hurry up, get out of the house before it gets filled with smoke.
 [https://sessokosga.itch.io/fire-escape-monogame](https://sessokosga.itch.io/fire-escape-monogame)
 
 ### Controls :
-You write down commands : 
-
-You can move between the rooms using directions: west(w), east(e), south(s) and north(n). You perform actions by inputting commands.
+You interact in the game by imputing commands.
 
 | Commands | Description |
 |:------:|:------:| 
+| west (w) | go to west |
+| south (s) | go to south |
+| east (e) | go to east |
+| north (n) | go to north |
 | take X | add object X to the inventory |
 | use X | use object x |
 | desc X | describe object X |
