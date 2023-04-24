@@ -2,7 +2,7 @@
 
 A Text based Adventure Game.
 
-Made for the [Gamedev.js game jam]()
+Made for the [Gamedev.js game jam](https://itch.io/jam/gamedevjs-2023)
 
 ### Theme : TIME
 
@@ -22,16 +22,22 @@ Hurry up, get out of the house before it gets filled with smoke.
 
 ### Get on itch.io : 
 
+[https://sessokosga.itch.io/fire-escape-monogame](https://sessokosga.itch.io/fire-escape-monogame)
+
 ### Controls :
+You write down commands : 
 
 You can move between the rooms using directions: west(w), east(e), south(s) and north(n). You perform actions by inputting commands.
 
+| Commands | Description |
+|:------:|:------:| 
+| take X | add object X to the inventory |
+| use X | use object x |
+| desc X | describe object X |
+| describe X | describe object X |
+
 
 ### Code : by me
-
-### Music : Benni
-
-### Graphism : None
 
 ### Development duration : 
 
