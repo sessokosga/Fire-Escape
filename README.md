@@ -29,6 +29,8 @@ You interact in the game by imputing commands.
 
 | Commands | Description |
 |:------:|:------:| 
+| start | start the game |
+| credits | open credits |
 | west (w) | go to west |
 | south (s) | go to south |
 | east (e) | go to east |

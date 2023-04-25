@@ -14,7 +14,7 @@ namespace WebGLxna
             isWriting = true;
             textTimer = 0;
             writedCharacter = 0;
-            text = "Game dev : Sesso Kosga\n\n         Musics : Benni";
+            text = "Game dev : Sesso Kosga";
         }
 
 
