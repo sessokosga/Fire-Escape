@@ -40,19 +40,7 @@ You interact in the game by imputing commands.
 | desc X | describe object X |
 | describe X | describe object X |
 
-
-### Code : by me
-
-### Development duration : 
-
-### Post mortem
-
-
-### Screenshots
-
-
-by Sesso Kosga kosgasesso@gmail.com
-
+### Development duration : 15h 07 mins
 
 # WebGLxnaProj
 
